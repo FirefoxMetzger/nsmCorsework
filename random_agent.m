@@ -4,38 +4,33 @@ classdef random_agent < handle
     % The agent will take a random action in each state.
     %
     % (c) 2016 Sebastian Wallkötter
+    properties(Access=private)
+        world = simulator();
+    end
     
     methods
-        function [num_steps, ret_mat] = rndEpisode(~)
+        function [num_steps, STM] = rndEpisode(this)
             gamma = 0.9;
-            
-            episode = zeros(1,3);
-            pos = 1;
-            
-            world = simulator();
-            world.reset();
-            while ~world.isGoal()
-                o = world.observe();
+            STM = zeros(20,3);
+            num_steps = 1;
+
+            this.world.reset();
+            while ~this.world.isGoal()
+                o = this.world.observe();
                 a = randi(4);
-                r = world.take_action(a);
+                r = this.world.take_action(a);
                 
-                episode(pos,:) = [o a r];
-                pos = pos + 1;
+                STM = circshift(STM,[-1 0]);
+                STM(20,:) = [o a r];
+                num_steps = num_steps + 1;
             end
             
-            num_steps = size(episode,1);
+            STM(:,3) = STM(20,3) * gamma.^(19:-1:0);
             
-            for idx = (num_steps-1):-1:1
-                episode(idx,3) = episode(idx,3) + gamma * episode(idx+1,3);
+            if num_steps < 20
+                STM(1:(20-num_steps),3) = 0;
             end
             
-            if num_steps >= 20
-                ret_mat = episode((end-19):end,:);
-            else
-                ret_mat = zeros(20,3);
-                first_idx = 21-num_steps;
-                ret_mat(first_idx:end,:) = episode;
-            end
         end
         function [steps, LTM] =  Trials(this,num_trials)
             LTM = zeros(20,3,num_trials);
