@@ -36,6 +36,7 @@ classdef nsm_agent < handle
             
             this.world.reset();
             this.STM = zeros(20,3);
+            this.steps_stored = 0;
             while ~this.world.isGoal()
                 o = this.world.observe();
                 a = this.NSMSelectAction(o);
@@ -68,9 +69,7 @@ classdef nsm_agent < handle
         end
         function score = proximity(this, episode, step, o)
             % define some nice names
-            LTM = this.LTM(:,:,1:(this.episodes_stored));       %#ok<PROPLC>
-            past = LTM(1:step-1,1:2,episode);                   %#ok<PROPLC>
-            present = LTM(step,1:2,episode);                    %#ok<PROPLC>
+            present = this.LTM(step,1:2,episode);       
             
             % if observation differs from LTM's present observation,
             % score is 0
@@ -79,21 +78,27 @@ classdef nsm_agent < handle
                 return;
             end
             
-            % compare LTM's past to LTM past to see how close it is
-            STM_size = this.steps_stored;
+            past = this.LTM(1:step-1,1:2,episode);
+            zero_rows = all(past == 0,2);
+            past(zero_rows,:) = [];
+            
+            local_STM = this.STM(:,1:2);
+            zero_rows = all(local_STM == 0,2);
+            local_STM(zero_rows,:) = [];
+            
+            
+            % compare LTM's past to STM past to see how close it is
+            STM_size = size(local_STM,1);
             past_size = size(past, 1);
             
             %exctract the last 'common' elements from both elements
             common = (min(STM_size,past_size)-1):-1:0;
             
-            idx_past = past_size - common;
-            past = past(idx_past,:);
-            
-            idx_STM = STM_size - common;
-            STM = this.STM(idx_STM,1:2);                        %#ok<PROPLC>
+            past = past(end - common,:);
+            local_STM = this.STM(end - common,1:2);
             
             %find out how many (o,a) pairs match
-            matches = all(past == STM,2);                       %#ok<PROPLC>
+            matches = all(past == local_STM,2);
             num_matches = find([matches; 0]==0, 1);
             score = 1 + (num_matches-1);
         end
