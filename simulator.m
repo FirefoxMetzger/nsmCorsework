@@ -9,7 +9,7 @@ classdef simulator < handle
     %                   with taking this action in the current state
     % isGoal(a)      -- check if in the goal state
     %
-    % (c) 2016 Sebastian Wallkötter
+    % (c) 2016 Sebastian Wallkoetter
     
     properties(Access=private)
         s = randi(11); % current state

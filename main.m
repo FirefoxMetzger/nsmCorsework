@@ -5,7 +5,7 @@
 % episodes with random action selection and num_trials many episodes using
 % NSM for action selection.
 % 
-% (c) 2016 Sebastian Wallk�tter
+% (c) 2016 Sebastian Wallkoetter
 
 % change as desired
 num_trials = 100;
