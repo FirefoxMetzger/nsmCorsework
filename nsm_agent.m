@@ -113,6 +113,7 @@ classdef nsm_agent < handle
                 a = available_actions(rand_action);
             end
         end
+        
         function score = proximity(this, episode, step, o)
             % Calculate how close a state in the LTM is to the current
             % state.
@@ -152,10 +153,21 @@ classdef nsm_agent < handle
             num_matches = find([matches; 0] == 0, 1);
             score = 1 + (num_matches-1);
         end
+        
         function kNN = kNearest(this, o)
+            % find and return the 10 nearest neighbours in the LTM, given 
+            % the STM and a current observation
+            % Input:    o       --- The current observation
+            % Output:   kNN     --- A list of the 10 nearest states and
+            %                       their score.
+            
             kNN = zeros(10,4);
-            for step = 20:-1:2
+            for step = 20:-1:1
                 for episode = 1:this.episodes_stored
+                    % this entire for loop could be vectorized. But this
+                    % would require to refactor and remove proximity() thus
+                    % it has been omitted in this implementation.
+                    
                     score = this.proximity(episode,step,o);
                     if kNN(1,4) <= score && score > 0
                         kNN(1,:) = [this.LTM(step,:,episode) score];
