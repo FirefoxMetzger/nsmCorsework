@@ -5,10 +5,10 @@ classdef nsm_agent < handle
     % This information is used to make decisions about the current action,
     % by comparing chains of previous observations and actions.
     %
-    % (c) 2016 Sebastian Wallkötter
+    % (c) 2016 Sebastian Wallkï¿½tter
+    
     properties(Access=private)
         episodes_stored = 0;
-        steps_stored = 0;
         world = simulator();
         STM = zeros(20,3);
         LTM = zeros(20,3,0);
@@ -36,13 +36,11 @@ classdef nsm_agent < handle
             
             this.world.reset();
             this.STM = zeros(20,3);
-            this.steps_stored = 0;
             while ~this.world.isGoal()
                 o = this.world.observe();
                 a = this.NSMSelectAction(o);
                 r = this.world.take_action(a);
                 
-                this.steps_stored = min(20,this.steps_stored + 1);
                 this.STM = circshift(this.STM,[-1 0]);
                 this.STM(20,:) = [o a r];
                 num_steps = num_steps + 1;
@@ -54,9 +52,22 @@ classdef nsm_agent < handle
            ret_mat = this.STM;
         end
         function a = NSMSelectAction(this, o)
+            % selects an action based on actions and observations 
+            % (STM) made in this episode and past experiences (LTM).
+            % The action selection is epsilon-greedy, with epsilon = 10 %.
+            % Input: o -- the current observation
+            % Output: a -- action chosen
+            
             if rand < 0.1
+                % pick a random action
                 a = randi(4);
+                
             else
+                % select an action based on past experiences
+                
+                % find the 10 closest POMDP states observed in the past and
+                % average their discounted reward with respect to the first
+                % action taken.
                 kNN = this.kNearest(o);
                 rewards = zeros(1,4);
                 for idx = 1:4
@@ -64,7 +75,19 @@ classdef nsm_agent < handle
                     rewards(idx) = mean(kNN(same_action,3));
                 end
                 rewards(isnan(rewards)) = 0;
-                [~,a] = max(rewards);
+                
+                % select the best action. If tie for multiple, pick random
+                % witin those.
+                max_val = max(rewards);
+                available_actions = 1:4;
+                available_actions = ...
+                    (available_actions(abs(rewards-max_val) < 0.01));
+                
+                if size(available_actions, 2) == 1
+                    a = available_actions;
+                else
+                    a = randsample(available_actions,1);
+                end
             end
         end
         function score = proximity(this, episode, step, o)
