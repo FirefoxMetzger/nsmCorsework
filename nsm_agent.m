@@ -162,7 +162,7 @@ classdef nsm_agent < handle
             %                       their score.
             
             kNN = zeros(10,4);
-            for step = 20:-1:1
+            for step = 20:-1:2
                 for episode = 1:this.episodes_stored
                     % this entire for loop could be vectorized. But this
                     % would require to refactor and remove proximity() thus

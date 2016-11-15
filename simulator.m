@@ -20,6 +20,9 @@ classdef simulator < handle
     
     methods
         function obj = simulator(~)
+            % construct a POMDP based on McCallum's grid world. This
+            % routine creates the world by setting the transition function
+            % T as well as the observations for each state.
             
             obj.T = [
                 4 2   6   7   9   11  7   8   9   10  11
@@ -31,26 +34,48 @@ classdef simulator < handle
         end
         
         function r =  take_action(this, a)
+            % execute action a. This will result in a new current state and
+            % a reward
+            % Input:    a   --- The action to be executed
+            % Output:   r   --- The reward obtained from taking action a in
+            %                   state s
+            
             r = this.reward(a);
             this.s = this.T(a,this.s);
-            next_state = this.s;
         end
+        
         function o = observe(this)
+            % Resturns what can be seen in the current state
+            % Output:   o   --- The current observation
+            
             o = this.observations(this.s);
         end
+        
         function reset(this)
+            % Reset the world, placing the agent in a random state ~= 2
+            
             possible_states = 1:11;
             possible_states(2) = [];
             this.s = randsample(possible_states,1);
-            state = this.s;
         end
+        
         function b = isGoal(this)
+            % returns true if the current state is the goal state
+            % Output:   b   --- True, if goal has been reached. False
+            %                   otherwise.
+            
             b = (this.s == 2);
         end
         
     end
+    
     methods(Access = private)
         function r = reward(this, a)
+            % the reward for taking action a in the current state
+            % Input:    a   --- the action taken
+            % Output:   r   --- reward for taking that action in the
+            %                   current state
+            
             if this.s == 5 && a == 3
                 r = 10;
             else
