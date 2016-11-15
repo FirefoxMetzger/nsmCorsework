@@ -1,4 +1,4 @@
-% The main entry point to the RL assignment. Part of AINT511 at Plymouth
+    % The main entry point to the RL assignment. Part of AINT511 at Plymouth
 % University.
 % 
 % This function plots a graph displaying the results of num_trials many
