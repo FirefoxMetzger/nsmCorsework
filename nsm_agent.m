@@ -15,7 +15,7 @@ classdef nsm_agent < handle
     end
     
     methods
-        function [steps, ret_LTM] =  Trials(this,num_trials)
+        function [steps, ret_LTM] =  Trials(this, num_trials)
             % gather num_trials many episodes using NSM action
             % selection. For each Episode reccord the total number of steps
             % and the last 20 visited nodes.
@@ -120,13 +120,11 @@ classdef nsm_agent < handle
             % Input:    (episode,step)  --- The state in the LTM
             %           o               --- The current observation
             % Output:   score           --- The closeness of the two
-            %                               states. Higher is closer.
-            
-            present = this.LTM(step,1:2,episode);       
+            %                               states. Higher is closer.     
             
             % if observation differs from LTM's present observation,
             % score is 0
-            if present(1) ~= o
+            if this.LTM(step,1,episode) ~= o
                 score = 0;
                 return;
             end
@@ -162,6 +160,8 @@ classdef nsm_agent < handle
             %                       their score.
             
             kNN = zeros(10,4);
+            lowest_score = 0;
+            
             for step = 20:-1:2
                 for episode = 1:this.episodes_stored
                     % this entire for loop could be vectorized. But this
@@ -169,11 +169,10 @@ classdef nsm_agent < handle
                     % it has been omitted in this implementation.
                     
                     score = this.proximity(episode,step,o);
-                    if kNN(1,4) <= score && score > 0
-                        kNN(1,:) = [this.LTM(step,:,episode) score];
-                        
-                        [~,idx] = sort(kNN(:,4));
-                        kNN = kNN(idx,:);
+                    if lowest_score <= score && score > 0
+                        [~,idx] = min(kNN(:,4));
+                        kNN(idx,:) = [this.LTM(step,:,episode) score];
+                        lowest_score = min(kNN(:,4));
                     end
                 end
             end
