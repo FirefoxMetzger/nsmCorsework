@@ -131,12 +131,12 @@ classdef nsm_agent < handle
             
             % local copy of LTM stripped from everything unneeded
             past = this.LTM(1:step-1,1:2,episode);
-            zero_rows = all(past == 0,2);
+            zero_rows = all(past == 0,2); % removes empty rows if ep was less than 20 steps
             past(zero_rows,:) = [];
             
             % local copy of STM stripped from everything unneeded
             local_STM = this.STM(:,1:2);
-            zero_rows = all(local_STM == 0,2);
+            zero_rows = all(local_STM == 0,2); % removes empty rows if ep was less than 20 steps
             local_STM(zero_rows,:) = [];
             
             % compare LTM's past to STM past to see how close it is
